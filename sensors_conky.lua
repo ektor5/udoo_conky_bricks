@@ -30,9 +30,9 @@ do
 		local table = ""
 		local yoff = 58
 		local xoff = -6
-		local col = 2
-		local row = 8
-		local wheight = 68
+		local col = 3
+		local row = 6
+		local wheight = 73
 
 		local head = "${color grey}"
 
@@ -50,10 +50,15 @@ do
 			local xgoto = wwidth * sens_col + xglobaloff
 			local ygoto = math.floor( row * wheight )
 
-			local img_xoff = xgoto + xoff
-			local img_yoff = math.floor( yoff + wheight * sens_row )
-			local img_width = wwidth + xoff
-			local img_height = wheight + 4
+			local bg_xoff = xgoto + xoff
+			local bg_yoff = math.floor( yoff + wheight * sens_row )
+			local bg_width = wwidth + xoff
+			local bg_height = wheight + 4
+
+			local img_xoff = bg_xoff + 15
+			local img_yoff = bg_yoff + 35
+			local img_width = 13
+			local img_height = 13
 
 			local function tabr(width)
 				return "${alignr "..xmax-xgoto -wwidth*(sens_col+1).." }"
@@ -68,11 +73,12 @@ do
 			end
 
 			local nhead = head .."${goto "..xgoto.."}"
-			table = table ..nhead.. tab(15) .. "Brick " .. index .. " ( " .. sensor .. " ) \n"
-			table = table ..nhead.. tab(20) .. "Temp:"..tab(wwidth*0.7).."${i2c " .. sensor .. " temp 1}C \n"
-			table = table ..nhead.. tab(20) .. "Hum:" ..tab(wwidth*0.7).."${i2c " .. sensor .. " humidity 1 0.001 0.0 } % \n"
-			table = table .. "${image ~/.conky/base.png -p ".. img_xoff ..","..img_yoff.." -s "..img_width.."x"..img_height.."} \n"
-			table = table .. "${image ~/.conky/base.png -p ".. img_xoff ..","..img_yoff.." -s "..img_width.."x"..img_height.."} \n"
+			table = table ..nhead.. tab(15) .. "${color orange}Brick " .. index .. " ( " .. sensor .. " )${voffset 5} \n"
+			table = table ..nhead.. tab(35) .. "Temp:"..tab(wwidth*0.7).."${i2c " .. sensor .. " temp 1}°C \n"
+			table = table ..nhead.. tab(35) .. "Hum:" ..tab(wwidth*0.7).."${i2c " .. sensor .. " humidity 1 0.001 0.0 } % \n"
+			table = table .. "${image ~/.config/conky/base.png -p ".. bg_xoff ..","..bg_yoff.." -s "..bg_width.."x"..bg_height.."}"
+			table = table .. "${image ~/.config/conky/temp.png -p ".. img_xoff ..",".. img_yoff.." -s "..img_width.."x"..img_height.."}"
+			table = table .. "${image ~/.config/conky/hum.png -p  ".. img_xoff ..",".. img_yoff+17 .." -s "..img_width.."x"..img_height.."} \n"
 
 		end
 		return table 
