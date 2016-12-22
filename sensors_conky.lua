@@ -12,26 +12,68 @@ do
 
 	local sens_path="/sys/module/hwmon/holders/si70xx/drivers/i2c\:si70xx/"
 
-	function conky_gen_widget()
+	function scandir(directory)
+		local i, t, popen = 0, {}, io.popen
+		local pfile = popen('find "'..directory..'" -maxdepth 1 -name [0-9]*')
+		for filename in pfile:lines() do
+			i = i + 1
+			t[i] = filename
+		end
+		pfile:close()
+		return t
+	end
+	
+
+	function conky_gen_widget(xmax,ymax)
 		-- generate all widgets
-		local sensors = 16
+		local xglobaloff = 20
 		local table = ""
+		local yoff = 58
+		local xoff = -6
+		local col = 2
+		local row = 8
+		local wheight = 68
 
 		local head = "${color grey}"
 
-		for i=1,sensors do
-			local nhead = head
+		local e = scandir(sens_path)
+
+		for index,dir in ipairs(e) do
+			-- column index
+			local i = index - 1
+			local sensor = string.match(dir,"[0-9]*-%d*")
+			local sens_col = math.floor( i / row )
+			local sens_row = ( i % row )
+			-- widget width
+			local wwidth = math.floor( xmax / col )
+
+			local xgoto = wwidth * sens_col + xglobaloff
+			local ygoto = math.floor( row * wheight )
+
+			local img_xoff = xgoto + xoff
+			local img_yoff = math.floor( yoff + wheight * sens_row )
+			local img_width = wwidth + xoff
+			local img_height = wheight + 4
+
+			local function tabr(width)
+				return "${alignr "..xmax-xgoto -wwidth*(sens_col+1).." }"
+			end
+			local function tab(width)
+				return "${goto "..width+xgoto.." }"
+			end
+ 
 			-- set vertical offset
-			if i==(sensors/2)+1 then
-				table = table .. "${voffset -410}"
+			if ( sens_row == 0 and i ~= 0 )  then
+				table = table .. "${voffset -"..ygoto.."}"
 			end
-			-- second column
-			if i>(sensors/2) then
-				nhead = head .. "${goto 400}"
-			end
-			table = table ..nhead.. " Brick " .. i .. " ( " .. i+3 .. " ) \n"
-			table = table ..nhead.. "  Temp:${tab 200 0}${i2c " .. i+3 .. "-0040 temp 1}C \n"
-			table = table ..nhead.. "  Hum: ${tab 200 0}${i2c " .. i+3 .. "-0040 humidity 1 0.001 0.0 } % \n"
+
+			local nhead = head .."${goto "..xgoto.."}"
+			table = table ..nhead.. tab(15) .. "Brick " .. index .. " ( " .. sensor .. " ) \n"
+			table = table ..nhead.. tab(20) .. "Temp:"..tab(wwidth*0.7).."${i2c " .. sensor .. " temp 1}C \n"
+			table = table ..nhead.. tab(20) .. "Hum:" ..tab(wwidth*0.7).."${i2c " .. sensor .. " humidity 1 0.001 0.0 } % \n"
+			table = table .. "${image ~/.conky/base.png -p ".. img_xoff ..","..img_yoff.." -s "..img_width.."x"..img_height.."} \n"
+			table = table .. "${image ~/.conky/base.png -p ".. img_xoff ..","..img_yoff.." -s "..img_width.."x"..img_height.."} \n"
+
 		end
 		return table 
 	end
@@ -85,5 +127,8 @@ do
 	function conky_int_func()
 		int = int + 1
 		return int % 100
+	end
+	function conky_floor(arg)
+		return math.floor(arg)
 	end
 end
