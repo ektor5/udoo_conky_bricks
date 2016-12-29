@@ -10,11 +10,11 @@ do
 		buf = os.time()
 	end
 
-	local sens_path="/sys/module/hwmon/holders/si70xx/drivers/i2c\:si70xx/"
+	local sens_path="/sys/module/hwmon/holders/si70xx/drivers/i2c:si70xx/"
 
 	function scandir(directory)
 		local i, t, popen = 0, {}, io.popen
-		local pfile = popen('find "'..directory..'" -maxdepth 1 -name [0-9]*')
+		local pfile = popen('find "'..directory..'" -maxdepth 1 -name "[0-9]*"')
 		for filename in pfile:lines() do
 			i = i + 1
 			t[i] = filename
